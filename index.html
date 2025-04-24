@@ -1,0 +1,400 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🫰 MoneyTime Converter</title>
+    <style>
+        :root {
+            --bg-color: #121212;
+            --card-bg: #1e1e1e;
+            --text-color: #e0e0e0;
+            --accent-color: #4CAF50;
+            --accent-hover: #66BB6A;
+            --border-color: #333;
+            --input-bg: #2d2d2d;
+            --result-bg: #252525;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        body {
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 600px;
+            margin: 0 auto;
+            background-color: var(--card-bg);
+            border-radius: 10px;
+            padding: 20px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+        }
+
+        h1 {
+            text-align: center;
+            margin-bottom: 20px;
+            color: var(--accent-color);
+        }
+
+        .subtitle {
+            text-align: center;
+            margin-bottom: 25px;
+            color: #aaa;
+            font-size: 0.9rem;
+        }
+
+        .tabs {
+            display: flex;
+            margin-bottom: 20px;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .tab {
+            padding: 10px 20px;
+            cursor: pointer;
+            background: none;
+            border: none;
+            color: var(--text-color);
+            font-weight: 600;
+            position: relative;
+            transition: all 0.3s ease;
+        }
+
+        .tab.active {
+            color: var(--accent-color);
+        }
+
+        .tab.active::after {
+            content: '';
+            position: absolute;
+            bottom: -1px;
+            left: 0;
+            width: 100%;
+            height: 2px;
+            background-color: var(--accent-color);
+        }
+
+        .tab:hover {
+            color: var(--accent-hover);
+        }
+
+        .tab-content {
+            display: none;
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+
+        .input-group {
+            margin-bottom: 20px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 500;
+        }
+
+        input {
+            width: 100%;
+            padding: 12px;
+            border-radius: 6px;
+            border: 1px solid var(--border-color);
+            background-color: var(--input-bg);
+            color: var(--text-color);
+            font-size: 16px;
+            transition: border 0.3s;
+        }
+
+        input:focus {
+            outline: none;
+            border-color: var(--accent-color);
+        }
+
+        .results-container {
+            background-color: var(--result-bg);
+            border-radius: 8px;
+            padding: 15px;
+            margin-top: 20px;
+            display: none;
+        }
+
+        .result-item {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 10px;
+        }
+
+        .result-item:last-child {
+            margin-bottom: 0;
+        }
+
+        .result-item span:first-child {
+            font-weight: 500;
+        }
+
+        .result-item span:last-child {
+            color: var(--accent-color);
+            font-weight: 600;
+        }
+
+        .output h2 {
+            margin: 20px 0 10px;
+            color: var(--accent-color);
+            font-size: 1.1rem;
+        }
+
+        .output p {
+            margin-bottom: 8px;
+            line-height: 1.5;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Money ↔ Time Converter</h1>
+        
+        <div class="tabs">
+            <button class="tab active" data-tab="time-to-money">Time as Money</button>
+            <button class="tab" data-tab="money-to-time">Money as Time</button>
+        </div>
+        
+        <!-- Time to Money Tab -->
+        <div id="time-to-money" class="tab-content active">
+            <p class="subtitle">Calculate how much you'll earn in a given period of time.</p>
+            <div class="input-group">
+                <label for="wage">Hourly Wage (£)</label>
+                <input type="number" id="wage" step="0.01" min="0.01" placeholder="Enter hourly wage" value="10">
+            </div>
+            
+            <div class="input-group">
+                <label for="hours">Hours Worked</label>
+                <input type="number" id="hours" step="1" min="0" placeholder="Enter hours">
+            </div>
+
+            <div class="input-group">
+                <label for="minutes">Minutes Worked</label>
+                <input type="number" id="minutes" step="1" min="0" max="59" placeholder="Enter minutes">
+            </div>
+
+            <div id="time-results" class="results-container">
+                <div class="result-item">
+                    <span>Total Earnings:</span>
+                    <span id="totalEarnings">-</span>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Money to Time Tab -->
+        <div id="money-to-time" class="tab-content">
+            <p class="subtitle">Calculate how long it will take to afford an item.</p>
+
+            <div class="input-group">
+                <label for="salary">Monthly Salary (£):</label>
+                <input type="number" id="salary" value="1000" min="0">
+            </div>
+
+            <div class="input-group">
+                <label for="price">Item Price (£):</label>
+                <input type="number" id="price" min="0">
+            </div>
+
+            <div class="output" id="money-results">
+                <h2>Time to Afford:</h2>
+                <p id="natural-time"></p>
+                <p id="work-days"></p>
+                <p id="months"></p>
+
+                <h2>Percentage of Wages:</h2>
+                <p id="hourly-percent"></p>
+                <p id="daily-percent"></p>
+                <p id="weekly-percent"></p>
+                <p id="monthly-percent"></p>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Tab functionality
+        const tabs = document.querySelectorAll('.tab');
+        const tabContents = document.querySelectorAll('.tab-content');
+
+        tabs.forEach(tab => {
+            tab.addEventListener('click', () => {
+                const tabId = tab.getAttribute('data-tab');
+                
+                // Update active tab
+                tabs.forEach(t => t.classList.remove('active'));
+                tab.classList.add('active');
+                
+                // Update active content
+                tabContents.forEach(content => content.classList.remove('active'));
+                document.getElementById(tabId).classList.add('active');
+            });
+        });
+
+        // Time to Money Calculator
+        const wageInput = document.getElementById('wage');
+        const hoursInput = document.getElementById('hours');
+        const minutesInput = document.getElementById('minutes');
+        const timeResultsContainer = document.getElementById('time-results');
+        const totalEarnings = document.getElementById('totalEarnings');
+
+        function formatCurrency(amount) {
+            return new Intl.NumberFormat('en-GB', { style: 'currency', currency: 'GBP' }).format(amount);
+        }
+
+        function calculateEarnings() {
+            const wage = parseFloat(wageInput.value);
+            const hours = parseFloat(hoursInput.value) || 0;
+            const minutes = parseFloat(minutesInput.value) || 0;
+
+            if (isNaN(wage) || wage <= 0 || (hours === 0 && minutes === 0)) {
+                timeResultsContainer.style.display = 'none';
+                return;
+            }
+
+            const totalHours = hours + (minutes / 60);
+            const earnings = wage * totalHours;
+            totalEarnings.textContent = formatCurrency(earnings);
+            timeResultsContainer.style.display = 'block';
+        }
+
+        wageInput.addEventListener('input', calculateEarnings);
+        hoursInput.addEventListener('input', calculateEarnings);
+        minutesInput.addEventListener('input', calculateEarnings);
+
+        // Initialize Time to Money calculator
+        calculateEarnings();
+
+        // Money to Time Calculator
+        // Constants
+        const HOURS_PER_WEEK = 37.5;
+        const DAYS_PER_WEEK = 5;
+        const WEEKS_PER_MONTH = 4.33;
+
+        // DOM Elements
+        const salaryInput = document.getElementById("salary");
+        const priceInput = document.getElementById("price");
+        const naturalTimeOutput = document.getElementById("natural-time");
+        const workDaysOutput = document.getElementById("work-days");
+        const monthsOutput = document.getElementById("months");
+        const hourlyPercentOutput = document.getElementById("hourly-percent");
+        const dailyPercentOutput = document.getElementById("daily-percent");
+        const weeklyPercentOutput = document.getElementById("weekly-percent");
+        const monthlyPercentOutput = document.getElementById("monthly-percent");
+
+        // Event Listeners
+        salaryInput.addEventListener("input", updateCalculations);
+        priceInput.addEventListener("input", updateCalculations);
+
+        // Main Function
+        function updateCalculations() {
+            const monthlySalary = parseFloat(salaryInput.value);
+            const itemPrice = parseFloat(priceInput.value);
+
+            if (isNaN(monthlySalary) || isNaN(itemPrice) || monthlySalary < 0 || itemPrice < 0) {
+                clearOutputs();
+                return;
+            }
+
+            // Calculations
+            const hourlyWage = monthlySalary / (HOURS_PER_WEEK * WEEKS_PER_MONTH);
+            const dailyWage = hourlyWage * (HOURS_PER_WEEK / DAYS_PER_WEEK);
+            const weeklyWage = hourlyWage * HOURS_PER_WEEK;
+
+            // Time to Afford
+            const totalHours = itemPrice / hourlyWage;
+            const hours = Math.floor(totalHours);
+            const minutes = Math.round((totalHours - hours) * 60);
+            const workDays = itemPrice / dailyWage;
+            const months = itemPrice / monthlySalary;
+
+            // Percentage of Wages
+            const hourlyPercent = (itemPrice / hourlyWage) * 100;
+            const dailyPercent = (itemPrice / dailyWage) * 100;
+            const weeklyPercent = (itemPrice / weeklyWage) * 100;
+            const monthlyPercent = (itemPrice / monthlySalary) * 100;
+
+            // Display Results
+            displayNaturalTime(hours, minutes);
+            displayWorkDays(workDays);
+            displayMonths(months);
+            displayPercentages(hourlyPercent, dailyPercent, weeklyPercent, monthlyPercent);
+        }
+
+        // Helper Functions
+        function displayNaturalTime(hours, minutes) {
+            if (hours === 0 && minutes === 0) {
+                naturalTimeOutput.textContent = "";
+            } else if (hours === 0) {
+                naturalTimeOutput.textContent = `${minutes} ${pluralize(minutes, "minute")}`;
+            } else if (minutes === 0) {
+                naturalTimeOutput.textContent = `${hours} ${pluralize(hours, "hour")}`;
+            } else {
+                naturalTimeOutput.textContent = `${hours} ${pluralize(hours, "hour")} and ${minutes} ${pluralize(minutes, "minute")}`;
+            }
+        }
+
+        function displayWorkDays(workDays) {
+            if (workDays >= 1) {
+                workDaysOutput.textContent = `${round(workDays)} ${pluralize(workDays, "shift")}`;
+            } else {
+                workDaysOutput.textContent = "";
+            }
+        }
+
+        function displayMonths(months) {
+            if (months >= 1) {
+                monthsOutput.textContent = `${round(months)} ${pluralize(months, "month")}`;
+            } else {
+                monthsOutput.textContent = "";
+            }
+        }
+
+        function displayPercentages(hourlyPercent, dailyPercent, weeklyPercent, monthlyPercent) {
+            hourlyPercentOutput.textContent = `${round(hourlyPercent)}% of your hourly wage`;
+            dailyPercentOutput.textContent = `${round(dailyPercent)}% of your daily wage`;
+            weeklyPercentOutput.textContent = `${round(weeklyPercent)}% of your weekly wage`;
+            monthlyPercentOutput.textContent = `${round(monthlyPercent)}% of your monthly wage`;
+        }
+
+        function pluralize(value, unit) {
+            return value === 1 ? unit : `${unit}s`;
+        }
+
+        function round(value) {
+            if (value % 1 === 0) {
+                return value.toFixed(0);
+            } else if (value * 10 % 1 === 0) {
+                return value.toFixed(1);
+            } else {
+                return value.toFixed(2);
+            }
+        }
+
+        function clearOutputs() {
+            naturalTimeOutput.textContent = "";
+            workDaysOutput.textContent = "";
+            monthsOutput.textContent = "";
+            hourlyPercentOutput.textContent = "";
+            dailyPercentOutput.textContent = "";
+            weeklyPercentOutput.textContent = "";
+            monthlyPercentOutput.textContent = "";
+        }
+
+        // Initialize Money to Time calculator
+        updateCalculations();
+    </script>
+</body>
+</html>
